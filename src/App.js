@@ -1,19 +1,40 @@
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { changeHeading, addUser } from './modules/common/creators/common-creators';
+import firebase from 'firebase';
+import { changeHeading, doGoogleLogin } from './modules/common/creators/common-creators';
 import logo from './logo.svg';
 import './App.css';
 
 function App(props) {
-  const { commonHeading, changeHeadingProps, changeUserProps, user } = props;
+  const { commonHeading, changeHeadingProps, user, doGoogleLoginProps, users } = props;
 
   const toggleHeading = useCallback(() => {
     changeHeadingProps(`New Header ${Math.random()}`);
   }, [changeHeadingProps]);
 
-  const toggleUser = useCallback(() => {
-    changeUserProps(`I am user number: ${Math.random()}`);
-  }, [changeUserProps]);
+  // const loginUser = useCallback(() => {
+  //   const provider = new firebase.auth.GoogleAuthProvider();
+  //   firebase.auth().signInWithPopup(provider).then((result) => {
+  //     const user = result.user;
+  //     const db = firebase.firestore();
+  //     db.collection('userInfo').add({
+  //       displayName: user.displayName,
+  //       email: user.email,
+  //       photoUrl: user.photoURL
+  //     });
+  //     setTimeout(() => {
+  //       db.collection('userInfo').get().then(snapshot => {
+  //         snapshot.forEach(snap => {
+  //           console.log(snap.data());
+  //         })
+  //       })
+  //     }, 2000);
+  //   })
+  // }, []);
+
+  const loginUser = useCallback(() => {
+    doGoogleLoginProps();
+  }, [doGoogleLoginProps]);
 
   return (
     <div className="App">
@@ -30,18 +51,21 @@ function App(props) {
         >
           {commonHeading}
           <p>{user}</p>
+          {users && (<p>user in the db: {users.length}</p>)}
         </a>
         <button onClick={toggleHeading} >Toggle Heading</button>
-        <button onClick={toggleUser} >Toggle User</button>
+        <button onClick={loginUser} >Toggle User</button>
       </header>
     </div>
   );
 }
 
 function mapYourStoreStateToComponentProps(state) {
+  // mapStateToProps
   return {
     commonHeading: state.$common.heading,
-    user: state.$common.user
+    user: state.$common.user,
+    users: state.$common.users,
   }
 }
 
@@ -49,7 +73,7 @@ const connected = connect(
   mapYourStoreStateToComponentProps,
   {
     changeHeadingProps: changeHeading,
-    changeUserProps: addUser,
+    doGoogleLoginProps: doGoogleLogin,
   }
 );
 
